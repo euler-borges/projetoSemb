@@ -1,9 +1,9 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
+  **************************
   * @file           : main.c
   * @brief          : Main program body
-  ******************************************************************************
+  **************************
   * @attention
   *
   * Copyright (c) 2024 STMicroelectronics.
@@ -13,7 +13,7 @@
   * in the root directory of this software component.
   * If no LICENSE file comes with this software, it is provided AS-IS.
   *
-  ******************************************************************************
+  **************************
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/

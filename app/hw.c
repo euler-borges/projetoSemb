@@ -13,5 +13,3 @@ uint32_t tempo_em_mili()
 {
 	return HAL_GetTick();
 }
-
-
