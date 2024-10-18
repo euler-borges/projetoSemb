@@ -4,12 +4,26 @@
  *  Created on: Oct 14, 2024
  *      Author: eufil
  */
+#include <stdbool.h>
+
+
 #include "main.h"
 #include "app.h"
 #include "hw.h"
 
+//variaveis auxiliares
 uint32_t tempo_restante_p1 = TEMPO_TOTAL;
 uint32_t tempo_restante_p2 = TEMPO_TOTAL;
+uint32_t tempo_atual, tempo_anterior;
+bool buzzer_ja_tocado = false;
+
+ESTADOS_MAQUINA estado_proximo_da_maquina = PAUSE;
+
+
+
+//feito para usar o htim2 declarano no main.c
+extern TIM_HandleTypeDef htim2;
+
 
 void app_init(void){
 
@@ -20,26 +34,50 @@ void app_loop(void){
 	//retorna struct com os valores das leituras
 	ESTADOS_DOS_PINOS estado_atual = checa_estados_pinos();
 
-	//retorna o valor interpretado das leituras
-	ESTADOS_MAQUINA estado = troca_de_estado(estado_atual);
 
-	HAL_Delay(100);
 	//debounce
-	if(troca_de_estado(checa_estados_pinos()) == estado_atual){
-		switch(estado_atual){
-			case PAUSE:
-				toca_buzzer(FREQUENCIA_DE_PAUSE);
-				continue;
-			case TURNO_P1:
-				cotinue;
-			case TURNO_P2:
-				continue;
+	HAL_Delay(100);
+
+	if(checa_estados_pinos().ESTADO_PINO_TROCA_PARA_P1 == estado_atual.ESTADO_PINO_TROCA_PARA_P1 && checa_estados_pinos().ESTADO_PINO_TROCA_PARA_P2 == estado_atual.ESTADO_PINO_TROCA_PARA_P2){
+		estado_proximo_da_maquina = troca_de_estado(estado_atual);
 		}
+
+
+	switch(estado_proximo_da_maquina){
+				case PAUSE:
+
+					/*
+					* Printar o pause na tela
+					*/
+
+					//executa um toque do buzzer caso ele ainda não tenha sido tocado
+					if(!buzzer_ja_tocado){
+						toca_buzzer(FREQUENCIA_DE_PAUSE);
+						HAL_Delay(500);
+						para_buzzer();
+						HAL_Delay(500);
+						//mantem registro do buzzer ter sido tocado ou não
+						buzzer_ja_tocado = true;
+					}
+
+
+
+					//mantem registro para troca de turno
+					tempo_anterior = tempo_em_mili();
+
+				case TURNO_P1:
+					buzzer_ja_tocado = false;
+
+				case TURNO_P2:
+					buzzer_ja_tocado = false;
+
+
 	}
 
 
+
 	//=============================================================================================================
-	/Código para gerenciar o i2c do display aqui/
+	/*Código para gerenciar o i2c do display aqui*/
 
 
 
