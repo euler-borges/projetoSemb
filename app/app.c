@@ -44,6 +44,7 @@ void app_loop(void){
 
 
 	switch(estado_proximo_da_maquina){
+				//cuida do pause do rrelógio
 				case PAUSE:
 
 					/*
@@ -55,7 +56,6 @@ void app_loop(void){
 						toca_buzzer(FREQUENCIA_DE_PAUSE);
 						HAL_Delay(500);
 						para_buzzer();
-						HAL_Delay(500);
 						//mantem registro do buzzer ter sido tocado ou não
 						buzzer_ja_tocado = true;
 					}
@@ -65,11 +65,34 @@ void app_loop(void){
 					//mantem registro para troca de turno
 					tempo_anterior = tempo_em_mili();
 
+				//cuida de quando esta correndo o tempo do jogador 1
 				case TURNO_P1:
+					//reseta a variavel para o caso de entrar em pause novamente
 					buzzer_ja_tocado = false;
+					//salva o momento atual
+					tempo_atual = tempo_em_mili();
+					//calcula o novo tempo restante do player 1
+					tempo_restante_p1 = tempo_restante_p1 - (tempo_atual - tempo_anterior);
+					//
+					tempo_anterior = tempo_atual;
+
+					/*
+					* Printar o estado do jogo na tela na tela
+					*/
 
 				case TURNO_P2:
+					//reseta a variavel para o caso de entrar em pause novamente
 					buzzer_ja_tocado = false;
+					//salva o momento atual
+					tempo_atual = tempo_em_mili();
+					//calcula o novo tempo restante do player 1
+					tempo_restante_p2 = tempo_restante_p2 - (tempo_atual - tempo_anterior);
+					//
+					tempo_anterior = tempo_atual;
+
+					/*
+					* Printar o estado do jogo na tela na tela
+					*/
 
 
 	}
