@@ -21,6 +21,13 @@ typedef enum
   TURNO_P2
 }ESTADOS_MAQUINA;
 
+typedef enum
+{
+  CORRENDO = 0,
+  DERROTA_P1,
+  DERROTA_P2
+}ESTADOS_JOGO;
+
 typedef struct
 {
 	GPIO_PinState ESTADO_PINO_TROCA_PARA_P2;

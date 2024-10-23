@@ -72,22 +72,53 @@ void app_loop(void){
 					//salva o momento atual
 					tempo_atual = tempo_em_mili();
 					//calcula o novo tempo restante do player 1
-					tempo_restante_p1 = tempo_restante_p1 - (tempo_atual - tempo_anterior);
+
+					if(tempo_restante_p1 > (tempo_atual - tempo_anterior)){
+						tempo_restante_p1 = tempo_restante_p1 - (tempo_atual - tempo_anterior);
+
+						/*
+						* Printar o estado do jogo na tela na tela
+						*/
+					}
+					else{
+						tempo_restante_p1 = 0;
+
+						/*
+						 * Printar derrota p1
+						 */
+					}
+
+
 					//
+
 					tempo_anterior = tempo_atual;
 
-					/*
-					* Printar o estado do jogo na tela na tela
-					*/
+
+
 
 				case TURNO_P2:
 					//reseta a variavel para o caso de entrar em pause novamente
 					buzzer_ja_tocado = false;
+
 					//salva o momento atual
 					tempo_atual = tempo_em_mili();
+
 					//calcula o novo tempo restante do player 1
-					tempo_restante_p2 = tempo_restante_p2 - (tempo_atual - tempo_anterior);
-					//
+					if(tempo_restante_p2 > (tempo_atual - tempo_anterior)){
+
+						tempo_restante_p2 = tempo_restante_p2 - (tempo_atual - tempo_anterior);
+
+					/*
+					* Printar o estado do jogo na tela na tela
+					*/
+					}
+					else{
+					tempo_restante_p2 = 0;
+
+					/*
+					* Printar derrota p2
+					*/
+										}					//
 					tempo_anterior = tempo_atual;
 
 					/*
