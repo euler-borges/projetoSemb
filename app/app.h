@@ -8,9 +8,8 @@
 #ifndef APP_H_
 #define APP_H_
 
-#define TEMPO_TOTAL 1800000
-#define FREQUECIA_DE_DERROTA 350
-#define FREQUENCIA_DE_PAUSE 669
+#define TEMPO_TOTAL 600000
+
 
 
 
@@ -18,7 +17,8 @@ typedef enum
 {
   PAUSE = 0,
   TURNO_P1,
-  TURNO_P2
+  TURNO_P2,
+  NADA
 }ESTADOS_MAQUINA;
 
 typedef enum
@@ -45,5 +45,8 @@ void para_buzzer();
 ESTADOS_MAQUINA troca_de_estado(ESTADOS_DOS_PINOS estado_atual);
 
 ESTADOS_DOS_PINOS checa_estados_pinos();
+ESTADOS_MAQUINA checa_com_debounce();
+
+void handle_start();
 
 #endif /* APP_H_ */

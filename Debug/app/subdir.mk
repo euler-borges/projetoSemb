@@ -6,15 +6,21 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../app/app.c \
-../app/hw.c 
+../app/buzzer.c \
+../app/hw.c \
+../app/lcd.c 
 
 OBJS += \
 ./app/app.o \
-./app/hw.o 
+./app/buzzer.o \
+./app/hw.o \
+./app/lcd.o 
 
 C_DEPS += \
 ./app/app.d \
-./app/hw.d 
+./app/buzzer.d \
+./app/hw.d \
+./app/lcd.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
@@ -24,7 +30,7 @@ app/%.o app/%.su app/%.cyclo: ../app/%.c app/subdir.mk
 clean: clean-app
 
 clean-app:
-	-$(RM) ./app/app.cyclo ./app/app.d ./app/app.o ./app/app.su ./app/hw.cyclo ./app/hw.d ./app/hw.o ./app/hw.su
+	-$(RM) ./app/app.cyclo ./app/app.d ./app/app.o ./app/app.su ./app/buzzer.cyclo ./app/buzzer.d ./app/buzzer.o ./app/buzzer.su ./app/hw.cyclo ./app/hw.d ./app/hw.o ./app/hw.su ./app/lcd.cyclo ./app/lcd.d ./app/lcd.o ./app/lcd.su
 
 .PHONY: clean-app
 

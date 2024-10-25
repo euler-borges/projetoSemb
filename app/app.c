@@ -5,46 +5,62 @@
  *      Author: eufil
  */
 #include <stdbool.h>
-
+#include <stdint.h>
+#include <stdlib.h>
 
 #include "main.h"
 #include "app.h"
 #include "hw.h"
+#include "buzzer.h"
+#include "lcd.h"
 
 //variaveis auxiliares
-uint32_t tempo_restante_p1 = TEMPO_TOTAL;
-uint32_t tempo_restante_p2 = TEMPO_TOTAL;
-uint32_t tempo_atual, tempo_anterior;
+uint32_t tempo_atual = 0;
+uint32_t tempo_anterior = 0;
 bool buzzer_ja_tocado = false;
 
 ESTADOS_MAQUINA estado_proximo_da_maquina = PAUSE;
+ESTADOS_MAQUINA estado_anterior_da_maquina = PAUSE;
 
 
 
-//feito para usar o htim2 declarano no main.c
-extern TIM_HandleTypeDef htim2;
+
+extern volatile uint8_t tens_minutes_counter_player_1;
+extern volatile uint8_t tens_seconds_counter_player_1;
+extern volatile uint8_t units_minutes_counter_player_1;
+extern volatile uint8_t units_seconds_counter_player_1;
+
+extern volatile uint8_t tens_minutes_counter_player_2;
+extern volatile uint8_t tens_seconds_counter_player_2;
+extern volatile uint8_t units_minutes_counter_player_2;
+extern volatile uint8_t units_seconds_counter_player_2;
+
+volatile uint32_t tempo_atual_turno, tempo_anterior_turno, dt;
+
+
+
+
+//feito para usar o htim2 declarado no main.c
 
 
 void app_init(void){
-
+	handle_start();
 }
 
 
 void app_loop(void){
-	//retorna struct com os valores das leituras
-	ESTADOS_DOS_PINOS estado_atual = checa_estados_pinos();
+	//em caso de não acntecer nada, retorna ao qe estava antes
+	estado_anterior_da_maquina = estado_proximo_da_maquina;
 
+	estado_proximo_da_maquina = checa_com_debounce();
 
-	//debounce
-	HAL_Delay(100);
-
-	if(checa_estados_pinos().ESTADO_PINO_TROCA_PARA_P1 == estado_atual.ESTADO_PINO_TROCA_PARA_P1 && checa_estados_pinos().ESTADO_PINO_TROCA_PARA_P2 == estado_atual.ESTADO_PINO_TROCA_PARA_P2){
-		estado_proximo_da_maquina = troca_de_estado(estado_atual);
-		}
-
+	if(estado_proximo_da_maquina == NADA){
+		estado_proximo_da_maquina = estado_anterior_da_maquina;
+	}
+	estado_anterior_da_maquina = estado_proximo_da_maquina;
 
 	switch(estado_proximo_da_maquina){
-				//cuida do pause do rrelógio
+				//cuida do pause do relógio
 				case PAUSE:
 
 					/*
@@ -65,33 +81,45 @@ void app_loop(void){
 					//mantem registro para troca de turno
 					tempo_anterior = tempo_em_mili();
 
-				//cuida de quando esta correndo o tempo do jogador 1
+				//cuida de quando esta co rrendo o tempo do jogador 1
 				case TURNO_P1:
 					//reseta a variavel para o caso de entrar em pause novamente
 					buzzer_ja_tocado = false;
+
 					//salva o momento atual
 					tempo_atual = tempo_em_mili();
 					//calcula o novo tempo restante do player 1
 
-					if(tempo_restante_p1 > (tempo_atual - tempo_anterior)){
-						tempo_restante_p1 = tempo_restante_p1 - (tempo_atual - tempo_anterior);
 
-						/*
-						* Printar o estado do jogo na tela na tela
-						*/
-					}
-					else{
-						tempo_restante_p1 = 0;
+					/*
+					 * Printar o estado do jogo na tela na tela
+					 *
+					 */
+					dt = tempo_atual - tempo_anterior;
 
-						/*
-						 * Printar derrota p1
-						 */
+					if(dt >= 1000)
+					{
+						decrease_one_second(estado_proximo_da_maquina);
+							if((tens_minutes_counter_player_1 == 0) &&
+								(tens_seconds_counter_player_1 == 0) &&
+								(units_minutes_counter_player_1 == 0) &&
+								(units_seconds_counter_player_1 == 0))
+							{
+								GAME_OVER();
+							}
+							//mudei pois ocorreria perca de valoress
+							tempo_anterior +=1000;
 					}
+
+
+
+					/*
+					 * Fim do print
+					 */
 
 
 					//
 
-					tempo_anterior = tempo_atual;
 
 
 
@@ -103,30 +131,31 @@ void app_loop(void){
 					//salva o momento atual
 					tempo_atual = tempo_em_mili();
 
-					//calcula o novo tempo restante do player 1
-					if(tempo_restante_p2 > (tempo_atual - tempo_anterior)){
+					dt = tempo_atual - tempo_anterior;
 
-						tempo_restante_p2 = tempo_restante_p2 - (tempo_atual - tempo_anterior);
+					if(dt >= 1000)
+					{
+						decrease_one_second(estado_proximo_da_maquina);
+						if((tens_minutes_counter_player_2 == 0) &&
+								(tens_seconds_counter_player_2 == 0) &&
+								(units_minutes_counter_player_2 == 0) &&
+								(units_seconds_counter_player_2 == 0))
+						{
+							GAME_OVER();
+						}
 
-					/*
-					* Printar o estado do jogo na tela na tela
-					*/
+						//mudei pois ocorreria perca de valoress
+						tempo_anterior +=1000;
 					}
-					else{
-					tempo_restante_p2 = 0;
-
-					/*
-					* Printar derrota p2
-					*/
-										}					//
-					tempo_anterior = tempo_atual;
 
 					/*
 					* Printar o estado do jogo na tela na tela
 					*/
 
 
-	}
+				//nunca chega aqui, só pra tirar o warning
+				case NADA:
+	}//fim do switch case
 
 
 
@@ -145,46 +174,39 @@ void app_loop(void){
 	//==============================================================================================================
 
 
+}//fim do app_loop
+
+void handle_start(){
+	/*
+	 * Printar a tela de inicio
+	 */
+
+	while(checa_com_debounce() != TURNO_P1 || checa_com_debounce() != TURNO_P2){
+		continue;
+	}
+
 }
 
 
-void toca_buzzer(float frequencia_de_toque) {
-    // Calculo do valor do periodo
-    uint32_t timer_clock = HAL_RCC_GetPCLK1Freq(); // Frequencia do clock do timer
-    uint32_t prescaler = TIM2->PSC + 1;            // Pegue o valor do prescaler do timer
-
-    uint32_t periodo = (timer_clock / (prescaler * frequencia_de_toque)) - 1;
-
-    // Ajuste do período do timer para a frequência desejada
-    __HAL_TIM_SET_AUTORELOAD(&htim2, periodo);
-
-    // Ajuste do duty cycle para 50%
-    __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, periodo / 2);
-
-    // Iniciando o PWM
-    HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
-}
-
-void para_buzzer() {
-    HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_1);  // Para o toque do buzzer, visto que precisamos só de um toque para indica os eventos
-}
 
 
 ESTADOS_MAQUINA troca_de_estado(ESTADOS_DOS_PINOS estado_atual){
-	if(estado_atual.ESTADO_PINO_TROCA_PARA_P1 == GPIO_PIN_SET){
-			//código para gerenciar troca para player 1
-			return TURNO_P1; //retorna o tempo em milisegundos que o processador está ligado
+	if(estado_atual.ESTADO_PINO_TROCA_PARA_P1 == GPIO_PIN_SET && estado_atual.ESTADO_PINO_TROCA_PARA_P2 == GPIO_PIN_SET){
+			//código para pausar
+			return PAUSE;
 
 		}
 		else if(estado_atual.ESTADO_PINO_TROCA_PARA_P2 == GPIO_PIN_SET){
 			//código para gerenciar troca para player 2
-			return TURNO_P2; //retorna o tempo em milisegundos que o processador está ligado
+			return TURNO_P2;
 
 		}
-		else if(estado_atual.ESTADO_PINO_TROCA_PARA_P1 == GPIO_PIN_SET || estado_atual.ESTADO_PINO_TROCA_PARA_P2 == GPIO_PIN_SET){
-			//código para gerenciar o pause
-			return PAUSE; //retorna o tempo em milisegundos que o processador está ligado
-
+		else if(estado_atual.ESTADO_PINO_TROCA_PARA_P1 == GPIO_PIN_SET ){
+			//código para gerenciar trocapara player 1
+			return TURNO_P1;
+		}
+		else{
+			return NADA;
 		}
 }
 
@@ -194,4 +216,22 @@ ESTADOS_DOS_PINOS checa_estados_pinos()
 	estado_atual.ESTADO_PINO_TROCA_PARA_P2 = HAL_GPIO_ReadPin(Pino_Troca_P2_GPIO_Port, Pino_Troca_P2_Pin);
 	estado_atual.ESTADO_PINO_TROCA_PARA_P1 = HAL_GPIO_ReadPin(Pino_Troca_P1_GPIO_Port, Pino_Troca_P1_Pin);
 	return estado_atual;
+}
+
+
+ESTADOS_MAQUINA checa_com_debounce(){
+	//retorna struct com os valores das leituras
+	ESTADOS_DOS_PINOS estado_atual = checa_estados_pinos();
+
+
+	//debounce
+	HAL_Delay(100);
+
+	ESTADOS_DOS_PINOS estado_proximo = checa_estados_pinos();
+
+	if(estado_proximo.ESTADO_PINO_TROCA_PARA_P1 == estado_atual.ESTADO_PINO_TROCA_PARA_P1 && estado_proximo.ESTADO_PINO_TROCA_PARA_P2 == estado_atual.ESTADO_PINO_TROCA_PARA_P2){
+		return troca_de_estado(estado_atual);
+		}
+
+	return NADA;
 }
