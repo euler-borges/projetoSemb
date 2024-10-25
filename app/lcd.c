@@ -23,10 +23,14 @@ volatile uint8_t tens_seconds_counter_player_2 = 0;
 volatile uint8_t units_minutes_counter_player_2 = 0;
 volatile uint8_t units_seconds_counter_player_2 = 0;
 
-const char* numbers =  "0123456789";
+char* numbers =  "0123456789";
 
-const char* player_1 = "PLAYER 1";							//Nome dos players
-const char* player_2 = "PLAYER 2";
+char* player_1 = "PLAYER 1";							//Nome dos players
+char* player_2 = "PLAYER 2";
+
+char* player_1_win = "PLAYER 1 WINS";
+char* player_2_win = "PLAYER 2 WINS";
+char* game_over = "GAME OVER";
 
 extern I2C_HandleTypeDef hi2c1;  						// change your handler here accordingly
 
@@ -107,13 +111,12 @@ void lcd_init (void)
 	HAL_Delay(10);
 
   // dislay initialisation
-	lcd_start();
-	lcd_send_cmd(Slave);//Slave=0x78
-	lcd_send_cmd(Comsend);//Comsend = 0x00
+	lcd_send_cmd(SLAVE_ADDRESS_LCD);//Slave=0x78
+	lcd_send_cmd(0x00);//Comsend = 0x00
 	lcd_send_cmd(0x38);
-	HAL_delay(10);
+	HAL_Delay(10);
 	lcd_send_cmd(0x39);
-	HAL_delay(10);					//Inicialização Padrão do Datasheet
+	HAL_Delay(10);					//Inicialização Padrão do Datasheet
 	lcd_send_cmd(0x14);
 	lcd_send_cmd(0x78);
 	lcd_send_cmd(0x5E);
@@ -121,8 +124,7 @@ void lcd_init (void)
 	lcd_send_cmd(0x0C);
 	lcd_send_cmd(0x01);
 	lcd_send_cmd(0x06);
-	HAL_delay(10);
-	lcd_stop();
+	HAL_Delay(10);
 
 	// Printar Valores Iniciais na tela
 
@@ -166,22 +168,6 @@ void lcd_send_string (char *str)
 	while (*str) lcd_send_data (*str++);
 }
 
-void lcd_start(void)
-{
-	SCL = 1;
-	SDA = 1;
-	SDA = 0;
-	SCL = 0;
-}
-
-void lcd_stop(void)
-{
-	SCL = 0;
-	SDA = 0;
-	SDA = 1;
-	SCL = 1;
-}
-
 void decrease_one_second(ESTADOS_MAQUINA estado_proximo_da_maquina)
 {
 
@@ -201,12 +187,12 @@ void decrease_one_second(ESTADOS_MAQUINA estado_proximo_da_maquina)
 			  lcd_send_data(numbers[tens_seconds_counter_player_1]);
 
 			  if(units_minutes_counter_player_1 == 0){
-			     units_minutes_counter_player_1 = 9;
+			     units_minutes_counter_player_1 = 9;		//ERROOOOOO
 			     lcd_put_cur(1, PLAYER1_UNITS_MINUTES_POS);
 			     lcd_send_data(numbers[units_minutes_counter_player_1]);
 
 			     if(tens_minutes_counter_player_1 == 0){
-				    tens_minutes_counter_player_1 = 9;
+				    tens_minutes_counter_player_1 = 0;
 				    lcd_put_cur(1, PLAYER1_TENS_MINUTES_POS);
 				    lcd_send_data(numbers[tens_minutes_counter_player_1]);
 			        }else{
@@ -249,7 +235,7 @@ void decrease_one_second(ESTADOS_MAQUINA estado_proximo_da_maquina)
 				     lcd_send_data(numbers[units_minutes_counter_player_2]);
 
 				     if(tens_minutes_counter_player_2 == 0){
-					    tens_minutes_counter_player_2 = 9;
+					    tens_minutes_counter_player_2 = 0;
 					    lcd_put_cur(1, PLAYER2_TENS_MINUTES_POS);
 					    lcd_send_data(numbers[tens_minutes_counter_player_2]);
 				        }else{
@@ -273,8 +259,6 @@ void decrease_one_second(ESTADOS_MAQUINA estado_proximo_da_maquina)
 				     lcd_send_data(numbers[units_seconds_counter_player_2]);
 			}
 		}
-
-
 
 
 

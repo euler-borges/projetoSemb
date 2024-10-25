@@ -23,6 +23,9 @@ ESTADOS_MAQUINA estado_proximo_da_maquina = PAUSE;
 ESTADOS_MAQUINA estado_anterior_da_maquina = PAUSE;
 
 
+extern char* player_1_win;
+extern char* player_2_win;
+extern char* game_over;
 
 
 extern volatile uint8_t tens_minutes_counter_player_1;
@@ -52,11 +55,14 @@ void app_loop(void){
 	//em caso de não acntecer nada, retorna ao qe estava antes
 	estado_anterior_da_maquina = estado_proximo_da_maquina;
 
+	//analisa onde se deve ir
 	estado_proximo_da_maquina = checa_com_debounce();
 
+	//para o caso de nenhuma acao ser tomada
 	if(estado_proximo_da_maquina == NADA){
 		estado_proximo_da_maquina = estado_anterior_da_maquina;
 	}
+	//para o proximo loop
 	estado_anterior_da_maquina = estado_proximo_da_maquina;
 
 	switch(estado_proximo_da_maquina){
@@ -105,7 +111,8 @@ void app_loop(void){
 								(units_minutes_counter_player_1 == 0) &&
 								(units_seconds_counter_player_1 == 0))
 							{
-								GAME_OVER();
+								GAME_OVER(estado_proximo_da_maquina);
+								reset_game();
 							}
 							//mudei pois ocorreria perca de valoress
 							tempo_anterior +=1000;
@@ -141,7 +148,9 @@ void app_loop(void){
 								(units_minutes_counter_player_2 == 0) &&
 								(units_seconds_counter_player_2 == 0))
 						{
-							GAME_OVER();
+							GAME_OVER(estado_proximo_da_maquina);
+							reset_game();
+
 						}
 
 						//mudei pois ocorreria perca de valoress
@@ -234,4 +243,39 @@ ESTADOS_MAQUINA checa_com_debounce(){
 		}
 
 	return NADA;
+}
+
+void GAME_OVER(ESTADOS_MAQUINA estado_proximo_da_maquina)
+{
+	lcd_clear();
+
+	if(estado_proximo_da_maquina == TURNO_P1){
+		lcd_put_cur(0,0);
+		lcd_send_string(game_over);
+		lcd_put_cur(1,0);
+		lcd_send_string(player_2_win);
+	}
+
+	else if(estado_proximo_da_maquina == TURNO_P2){
+		lcd_put_cur(0,0);
+		lcd_send_string(game_over);
+		lcd_put_cur(1,0);
+		lcd_send_string(player_1_win);
+		}
+}
+
+
+void reset_game(){
+	tens_minutes_counter_player_1 = 1;
+	tens_seconds_counter_player_1 = 0;
+	units_minutes_counter_player_1 = 0;
+	units_seconds_counter_player_1 = 0;
+															//Variáveis de posição para andar no "vetor de números."
+	tens_minutes_counter_player_2 = 1;
+	tens_seconds_counter_player_2 = 0;
+	units_minutes_counter_player_2 = 0;
+	units_seconds_counter_player_2 = 0;
+
+	estado_proximo_da_maquina = PAUSE;
+	HAL_Delay(5000);
 }

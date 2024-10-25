@@ -49,4 +49,8 @@ ESTADOS_MAQUINA checa_com_debounce();
 
 void handle_start();
 
+void GAME_OVER(ESTADOS_MAQUINA estado_proximo_da_maquina);
+
+void reset_game();
+
 #endif /* APP_H_ */
