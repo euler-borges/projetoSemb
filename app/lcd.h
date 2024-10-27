@@ -24,6 +24,9 @@ void lcd_clear (void); 														// limpa o lcd													//acaba iniciali
 
 void decrease_one_second (ESTADOS_MAQUINA estado_proximo_da_maquina); 		//diminui um segundo no relógio
 
+void pause_lcd(void);
+
+void reload_lcd(void);														//recarrega tela normal do jogo
 
 
 #endif

@@ -263,3 +263,48 @@ void decrease_one_second(ESTADOS_MAQUINA estado_proximo_da_maquina)
 
 
 }
+
+void pause_lcd(void){				//Muda estado do display para pausado.
+
+	lcd_clear();
+	lcd_put_cur(0,0);
+	lcd_send_string("PAUSED");
+
+}
+
+void reload_lcd(void){
+	//limpa tela e reescreve o relogio (como fez no init)
+	lcd_clear();
+
+	lcd_put_cur(0,0);
+	lcd_send_string(player_1);				//printando nomes
+	lcd_put_cur(0,9);
+	lcd_send_string(player_2);
+
+	lcd_put_cur(1, PLAYER1_UNITS_SECONDS_POS);
+	lcd_send_data(numbers[units_seconds_counter_player_1]);
+
+	lcd_put_cur(1, PLAYER1_TENS_SECONDS_POS);
+	lcd_send_data(numbers[tens_seconds_counter_player_1]);
+																		//Printando Relógio Player 1
+	lcd_put_cur(1, PLAYER1_UNITS_MINUTES_POS);
+	lcd_send_data(numbers[units_minutes_counter_player_1]);
+
+	lcd_put_cur(1, PLAYER1_TENS_MINUTES_POS);
+	lcd_send_data(numbers[tens_minutes_counter_player_1]);
+
+
+
+	lcd_put_cur(1, PLAYER2_UNITS_SECONDS_POS);
+	lcd_send_data(numbers[units_seconds_counter_player_2]);
+
+	lcd_put_cur(1, PLAYER2_TENS_SECONDS_POS);
+	lcd_send_data(numbers[tens_seconds_counter_player_2]);
+																		//Printando Relógio Player 2
+	lcd_put_cur(1, PLAYER2_UNITS_MINUTES_POS);
+	lcd_send_data(numbers[units_minutes_counter_player_2]);
+
+	lcd_put_cur(1, PLAYER2_TENS_MINUTES_POS);
+	lcd_send_data(numbers[tens_minutes_counter_player_2]);
+}
+

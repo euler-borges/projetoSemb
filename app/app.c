@@ -63,15 +63,13 @@ void app_loop(void){
 		estado_proximo_da_maquina = estado_anterior_da_maquina;
 	}
 	//para o proximo loop
-	estado_anterior_da_maquina = estado_proximo_da_maquina;
 
 	switch(estado_proximo_da_maquina){
 				//cuida do pause do relógio
 				case PAUSE:
 
-					/*
-					* Printar o pause na tela
-					*/
+					pause_lcd();
+
 
 					//executa um toque do buzzer caso ele ainda não tenha sido tocado
 					if(!buzzer_ja_tocado){
@@ -91,6 +89,8 @@ void app_loop(void){
 				case TURNO_P1:
 					//reseta a variavel para o caso de entrar em pause novamente
 					buzzer_ja_tocado = false;
+
+					if(estado_anterior_da_maquina == PAUSE){reload_lcd();} //reinicia lcd após despausar
 
 					//salva o momento atual
 					tempo_atual = tempo_em_mili();
@@ -135,6 +135,9 @@ void app_loop(void){
 					//reseta a variavel para o caso de entrar em pause novamente
 					buzzer_ja_tocado = false;
 
+
+					if(estado_anterior_da_maquina == PAUSE){reload_lcd();}
+
 					//salva o momento atual
 					tempo_atual = tempo_em_mili();
 
@@ -166,7 +169,7 @@ void app_loop(void){
 				case NADA:
 	}//fim do switch case
 
-
+	estado_anterior_da_maquina = estado_proximo_da_maquina;
 
 	//=============================================================================================================
 	/*Código para gerenciar o i2c do display aqui*/
